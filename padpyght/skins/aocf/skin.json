@@ -1,0 +1,50 @@
+{
+  "general": {
+    "background": "base",
+    "background-color": [16, 20, 24],
+    "size": [430, 64],
+    "anti-aliasing": true
+  },
+  "buttons": {
+    "d-up": {
+      "position": [35, 18],
+      "size": [14, 24]
+    },
+    "d-down": {
+      "position": [34, 43],
+      "size": [15, 28]
+    },
+    "d-left": {
+      "position": [15, 32],
+      "size": [23, 16]
+    },
+    "d-right": {
+      "position": [54, 32],
+      "size": [23, 16]
+    },
+    "A": {
+      "position": [96, 32],
+      "size": [41, 28]
+    },
+    "B": {
+      "position": [169, 33],
+      "size": [43, 28]
+    },
+    "X": {
+      "position": [241, 32],
+      "size": [43, 27]
+    },
+    "Y": {
+      "position": [317, 32],
+      "size": [43, 28]
+    },
+    "select": {
+      "position": [392, 33],
+      "size": [48, 49]
+    },
+    "start": {
+      "position": [412, 10],
+      "size": [41, 26]
+    }
+  }
+}
