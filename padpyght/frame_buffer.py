@@ -1,4 +1,5 @@
 import pygame
+import time
 
 
 class FrameBuffer(pygame.Surface):
@@ -22,10 +23,9 @@ class FrameBuffer(pygame.Surface):
 
         self._update_rectangles = []
 
-        self._clock = pygame.time.Clock()
-        self._fps = fps
-        self._lag = 0
+        self._target_fps = fps
         self._t_delta = 0
+        self._prev_time = time.time()
 
         if FrameBuffer.instance is None:
             FrameBuffer.instance = self
@@ -146,33 +146,18 @@ class FrameBuffer(pygame.Surface):
         return pygame.Rect(x, y, w, h)
 
     def limit_fps(self, set_caption=True):
-        t_delta = self._clock.tick(self._fps)
-        t_raw = self._clock.get_rawtime()
-        real_fps = int(self._clock.get_fps())
-        # too much less than 15 FPS and the brain stops pretending it's motion
-        if real_fps < self._fps - 3 and self._fps > 15:
-            self._lag += 1
-            if self._lag > 100:
-                self._fps /= 2
-                self._lag = 0
-        else:
-            if self._lag >= 0:
-                self._lag -= 1
-            # no sense in going over 60 FPS (that i'm aware, anyway)
-            elif t_raw * 2 < t_delta and self._fps < 60:
-                self._lag -= 1
-            else:
-                self._lag += 1
 
-            if self._lag < -100:
-                self._fps *= 2
-                self._lag = 0
+        curr_time = time.time()
+        diff = curr_time - self._prev_time
+        delay = max(1.0 / self._target_fps - diff, 0)
+        time.sleep(delay)
+        fps = 1.0/(delay + diff)
+        self._prev_time = curr_time
+        self._t_delta = diff
         if set_caption:
             pygame.display.set_caption('{} fps, targeting {} (lag: {})'.format(
-                real_fps, self._fps, (self._lag + 5) // 10
-            ))
-        self._t_delta = t_delta
-        return t_delta
+                int(fps), self._target_fps, int(delay)))
+        return diff
 
     def time_elapsed(self):
         return self._t_delta

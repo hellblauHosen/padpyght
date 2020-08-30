@@ -3,6 +3,7 @@ import pygame
 
 import configurator
 import frame_buffer
+import padpyght.images
 import visualizer
 import util
 
@@ -18,7 +19,7 @@ class PadMapper:
             self.cfg.size, self.cfg.size, scale_smooth=self.cfg.anti_aliasing,
             background_color=self.cfg.background_color)
 
-        self.gfx = visualizer.PadImage(self.cfg, self.fb)
+        self.gfx = padpyght.images.PadImage(self.cfg, self.fb)
 
     @staticmethod
     def display_message(msg):
