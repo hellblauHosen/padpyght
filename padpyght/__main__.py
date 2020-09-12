@@ -21,7 +21,7 @@ def main(skin, joy_index):
     mappings = configurator.load_mappings(skin)
     if joy.get_name() not in mappings:
         mapper.main(skin, joy_index)
-    visualizer.main(skin, joy_index)
+    visualizer.main(skin, joy_index, True)
 
 
 _skin = 'gamecube'
@@ -71,6 +71,7 @@ def list_skin_paths():
             path = pkg_resources.resource_filename('padpyght',
                                                    'skins/%s' % dir_name)
             yield dir_name, path
+
 
 for dir_name, path in list_skin_paths():
     cfg = os.path.join(path, 'skin.json')
