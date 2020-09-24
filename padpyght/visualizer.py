@@ -29,20 +29,10 @@ class InputState:
         return not self == other
 
     def __hash__(self):
-        return hash(self.button_map, self.axis_map)
+        return hash((self.button_map, self.axis_map))
 
     def __str__(self):
         return str(self.button_map) + str(self.axis_map)
-
-
-def start_history_process(skin, joy_index):
-    """
-    Method passed to a new Process to start this class in input history mode.
-    :param skin: See the documentation for main
-    :param joy_index: See the documentation for main
-    :return: None
-    """
-    main(skin, joy_index, False)
 
 
 def _get_target(pad_gfx, map_element):
@@ -82,7 +72,8 @@ def main(skin, joy_index,  is_main_process):
 
     height = pad_cfg.size[1]
     size = pad_cfg.size if is_main_process else (pad_cfg.size[0], height * 10)
-    fb = frame_buffer.FrameBuffer(size, size,
+    caption = "padpyght" if is_main_process else "input history"
+    fb = frame_buffer.FrameBuffer(size, size, caption,
                                   scale_smooth=pad_cfg.anti_aliasing,
                                   background_color=pad_cfg.background_color)
     pad_gfx = images.PadImage(pad_cfg, fb)
@@ -91,11 +82,12 @@ def main(skin, joy_index,  is_main_process):
 
     # Start the input history service process
     if is_main_process:
-        p = Process(target=start_history_process, args=(skin, joy_index))
+        p = Process(target=main, args=(skin, joy_index, False))
         p.start()
 
     # TODO: May want to initialize all inputs
     last_state = InputState()
+    last_font_rect = None
 
     # Main input/render loop
     while not pygame.event.peek(pygame.QUIT):
@@ -147,18 +139,27 @@ def main(skin, joy_index,  is_main_process):
         else:
             if last_state != new_state:
                 new_state.elapsed_frames = 0
-                print("L: " + str(last_state) + ", N:" + str(new_state))
+                # print("L: " + str(last_state) + ", N:" + str(new_state))
                 fb.scroll(0, height)
                 pad_gfx.draw()
                 fb.flip()
             else:
-                new_state.elapsed_frames += 1  # TODO: Actual frames
+                new_state.elapsed_frames += 1
+
+                if last_font_rect is not None:
+                    clear_surf = pygame.Surface((last_font_rect.width, last_font_rect.height))
+                    clear_surf.fill(pad_cfg.background_color)
+                    fb.blit(clear_surf, (0, 0))
+
+                # render the font
                 font_image = timer_font.render(
                     str(new_state.elapsed_frames),
                     True,
                     pygame.Color(255, 255, 255),
                     pad_cfg.background_color)
+                last_font_rect = font_image.get_rect()
                 fb.blit(font_image, (0, 0))
+                fb.flip()
             last_state = new_state
 
         fb.limit_fps(set_caption=True)

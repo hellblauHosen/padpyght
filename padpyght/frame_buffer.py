@@ -5,13 +5,14 @@ import time
 class FrameBuffer(pygame.Surface):
     instance = None
 
-    def __init__(self, display_res, fb_res,
+    def __init__(self, display_res, fb_res, caption,
                  flags=pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE,
                  fps=60, scale_type='pixelperfect', scale_smooth=False,
                  background_color=(0, 0, 0)):
         pygame.display.set_mode(display_res, flags)
         pygame.Surface.__init__(self, fb_res, flags)
 
+        self._caption = caption
         self._base_size = display_res
         self._scale_factor = 1.0
         self._scale_type = scale_type
@@ -146,18 +147,16 @@ class FrameBuffer(pygame.Surface):
         return pygame.Rect(x, y, w, h)
 
     def limit_fps(self, set_caption=True):
-
         curr_time = time.time()
-        diff = curr_time - self._prev_time
-        delay = max(1.0 / self._target_fps - diff, 0)
+        self._t_delta = curr_time - self._prev_time
+        delay = max(1.0 / self._target_fps - self._t_delta, 0)
         time.sleep(delay)
-        fps = 1.0/(delay + diff)
+        fps = 1.0/(delay + self._t_delta)
         self._prev_time = curr_time
-        self._t_delta = diff
         if set_caption:
-            pygame.display.set_caption('{} fps, targeting {} (lag: {})'.format(
+            pygame.display.set_caption(self._caption + ': {} fps, targeting {} (lag: {})'.format(
                 int(fps), self._target_fps, int(delay)))
-        return diff
+        return self._t_delta
 
     def time_elapsed(self):
         return self._t_delta
